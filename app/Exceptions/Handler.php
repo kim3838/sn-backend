@@ -66,12 +66,12 @@ class Handler extends ExceptionHandler
         return match (true) {
             $e instanceof HttpResponseException => $e->getResponse(),
             $e instanceof AuthenticationException => $this->authenticationExceptionResponse($request, $e),
-            $e instanceof ValidationException => $this->convertValidationExceptionToResponse($e, $request),
+            $e instanceof ValidationException => $this->validationExceptionResponse($e, $request),
             default => $this->renderExceptionResponse($request, $e),
         };
     }
 
-    protected function convertValidationExceptionToResponse(ValidationException $exception, $request)
+    protected function validationExceptionResponse(ValidationException $exception, $request)
     {
         return $this->shouldReturnJson($request, $exception)
             ? $this->unprocessableResponse($exception->errors(), $exception->getMessage())
