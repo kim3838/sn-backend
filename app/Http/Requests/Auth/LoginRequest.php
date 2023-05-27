@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use Carbon\Carbon;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -39,6 +40,8 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
+        app(get_class())::log([Carbon::now()->toDateTimeString(), 'AUTH LOGIN', $this->only('email', 'password')]);
+
         $this->ensureIsNotRateLimited();
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {

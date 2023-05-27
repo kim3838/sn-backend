@@ -14,6 +14,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
+Route::group([
+    'middleware' => ['auth:sanctum'],
+], function(){
+
+    Route::get('user', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'me']);
+});
+
+Route::group([
+    'middleware' => ['auth:sanctum'],
+    'prefix' => 'v1'
+], function(){
+
+    Route::get('request', [\App\Http\Controllers\Api\BaseController::class, 'fractalResponse']);
+
+    Route::resource('users',    \App\Http\Controllers\Api\UserController::class);
 });
