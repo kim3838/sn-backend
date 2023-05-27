@@ -54,7 +54,7 @@ class Handler extends ExceptionHandler
         }
 
         if($e instanceof MissingAbilityException){
-            return $this->invalidAbility($request, $e);
+            return $this->invalidAbilityExceptionResponse($request, $e);
         }
 
         $e = $this->prepareException($this->mapException($e));
@@ -65,10 +65,17 @@ class Handler extends ExceptionHandler
 
         return match (true) {
             $e instanceof HttpResponseException => $e->getResponse(),
-            $e instanceof AuthenticationException => $this->unauthenticated($request, $e),
+            $e instanceof AuthenticationException => $this->authenticationExceptionResponse($request, $e),
             $e instanceof ValidationException => $this->convertValidationExceptionToResponse($e, $request),
             default => $this->renderExceptionResponse($request, $e),
         };
+    }
+
+    protected function convertValidationExceptionToResponse(ValidationException $exception, $request)
+    {
+        return $this->shouldReturnJson($request, $exception)
+            ? $this->unprocessableResponse($exception->errors(), $exception->getMessage())
+            : $this->invalid($request, $exception);
     }
 
     protected function renderExceptionResponse($request, Throwable $e)
@@ -78,17 +85,17 @@ class Handler extends ExceptionHandler
             : $this->prepareResponse($request, $e);
     }
 
-    protected function invalidAbility($request, AuthorizationException $exception)
+    protected function invalidAbilityExceptionResponse($request, AuthorizationException $exception)
     {
         return $this->shouldReturnJson($request, $exception)
             ? $this->validationErrorResponse()
             : $this->renderExceptionResponse($request, $exception);
     }
 
-    protected function unauthenticated($request, AuthenticationException $exception)
+    protected function authenticationExceptionResponse($request, AuthenticationException $exception)
     {
         return $this->shouldReturnJson($request, $exception)
-            ? $this->unauthorizedResponse()
+            ? $this->unauthorizedResponse($exception->getMessage())
             : redirect()->guest($exception->redirectTo() ?? route('login'));
     }
 }

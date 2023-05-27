@@ -44,6 +44,11 @@ trait ResponsesJson
         return $this->response(false, [], $message, [], Response::HTTP_UNAUTHORIZED);
     }
 
+    public function unprocessableResponse($errors = [], $message = 'Unprocessable entity.'): JsonResponse
+    {
+        return $this->response(false, [], $message, $errors, Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
     public function forbiddenResponse($message = 'Forbidden.'): JsonResponse
     {
         return $this->response(false, [], $message, [], Response::HTTP_FORBIDDEN);

@@ -3,9 +3,11 @@
 namespace App\Http\Requests\Auth;
 
 use Carbon\Carbon;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -36,20 +38,19 @@ class LoginRequest extends FormRequest
     /**
      * Attempt to authenticate the request's credentials.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws AuthenticationException
+     * @throws ValidationException
      */
     public function authenticate(): void
     {
-        app(get_class())::log([Carbon::now()->toDateTimeString(), 'AUTH LOGIN', $this->only('email', 'password')]);
+        Log::debug(print_r([Carbon::now()->toDateTimeString(), 'AUTH LOGIN', $this->only('email', 'password')], true));
 
         $this->ensureIsNotRateLimited();
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
-            throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
-            ]);
+            throw new AuthenticationException(__('auth.failed'));
         }
 
         RateLimiter::clear($this->throttleKey());
