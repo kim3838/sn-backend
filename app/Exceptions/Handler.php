@@ -39,6 +39,11 @@ class Handler extends ExceptionHandler
         });
     }
 
+    public function report(Throwable $e)
+    {
+        //parent::report($exception);
+    }
+
     public function render($request, Throwable $e)
     {
         Log::error(print_r([
