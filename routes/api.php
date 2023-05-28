@@ -1,6 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,7 +20,7 @@ Route::group([
     'middleware' => ['auth:sanctum'],
 ], function(){
 
-    Route::get('user', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'me']);
+    Route::get('user', [AuthenticatedSessionController::class, 'me']);
 });
 
 Route::group([
@@ -26,7 +28,15 @@ Route::group([
     'prefix' => 'v1'
 ], function(){
 
-    Route::get('request', [\App\Http\Controllers\Api\BaseController::class, 'fractalResponse']);
+    Route::get('request', [BaseController::class, 'fractalResponse']);
 
-    Route::resource('users',    \App\Http\Controllers\Api\UserController::class);
+    Route::group([
+        'as' => 'users.'
+    ], function(){
+        Route::get('users', [UserController::class, 'index'])->name('index');
+        Route::post('users', [UserController::class, 'store'])->name('store');
+        Route::get('users/{user}', [UserController::class, 'show'])->name('show');
+        Route::patch('users/{user}', [UserController::class, 'update'])->name('update');
+        Route::delete('users/{user}', [UserController::class, 'destroy'])->name('destroy');
+    });
 });
