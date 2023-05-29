@@ -8,10 +8,14 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse as HttpJsonResponse;
+use Illuminate\Http\RedirectResponse as HttpRedirectResponse;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Exceptions\MissingAbilityException;
+use Symfony\Component\HttpFoundation\Response as SymfonyHttpFoundationResponse;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -76,28 +80,28 @@ class Handler extends ExceptionHandler
         };
     }
 
-    protected function validationExceptionResponse(ValidationException $exception, $request)
+    protected function validationExceptionResponse(ValidationException $exception, $request): HttpResponse|HttpJsonResponse
     {
         return $this->shouldReturnJson($request, $exception)
             ? $this->unprocessableResponse($exception->errors(), $exception->getMessage())
             : $this->invalid($request, $exception);
     }
 
-    protected function renderExceptionResponse($request, Throwable $e)
+    protected function renderExceptionResponse($request, Throwable $e): HttpJsonResponse|SymfonyHttpFoundationResponse
     {
         return $this->shouldReturnJson($request, $e)
             ? $this->serverErrorResponse()
             : $this->prepareResponse($request, $e);
     }
 
-    protected function invalidAbilityExceptionResponse($request, AuthorizationException $exception)
+    protected function invalidAbilityExceptionResponse($request, AuthorizationException $exception): HttpJsonResponse|SymfonyHttpFoundationResponse
     {
         return $this->shouldReturnJson($request, $exception)
             ? $this->validationErrorResponse()
             : $this->renderExceptionResponse($request, $exception);
     }
 
-    protected function authenticationExceptionResponse($request, AuthenticationException $exception)
+    protected function authenticationExceptionResponse($request, AuthenticationException $exception): HttpJsonResponse|HttpRedirectResponse
     {
         return $this->shouldReturnJson($request, $exception)
             ? $this->unauthorizedResponse($exception->getMessage())
