@@ -78,12 +78,12 @@ trait ResponsesJson
 
     public function responseByCode($code): JsonResponse
     {
-        switch ($code){
-            case Response::HTTP_INTERNAL_SERVER_ERROR: return $this->serverErrorResponse();
-            case Response::HTTP_SERVICE_UNAVAILABLE: return $this->serviceUnavailableResponse();
-            case Response::HTTP_NOT_FOUND: return $this->notFoundResponse();
-            case Response::HTTP_FORBIDDEN: return $this->forbiddenResponse();
-            case Response::HTTP_TOO_MANY_REQUESTS: return $this->tooManyRequestsResponse();
-        }
+        return match (true){
+            $code == Response::HTTP_INTERNAL_SERVER_ERROR => $this->serverErrorResponse(),
+            $code == Response::HTTP_SERVICE_UNAVAILABLE => $this->serviceUnavailableResponse(),
+            $code == Response::HTTP_NOT_FOUND => $this->notFoundResponse(),
+            $code == Response::HTTP_FORBIDDEN => $this->forbiddenResponse(),
+            $code == Response::HTTP_TOO_MANY_REQUESTS => $this->tooManyRequestsResponse()
+        };
     }
 }
