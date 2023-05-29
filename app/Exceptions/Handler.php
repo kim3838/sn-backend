@@ -8,6 +8,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse as HttpJsonResponse;
 use Illuminate\Http\RedirectResponse as HttpRedirectResponse;
 use Illuminate\Http\Response as HttpResponse;
@@ -75,23 +76,10 @@ class Handler extends ExceptionHandler
         return match (true) {
             $e instanceof HttpResponseException => $e->getResponse(),
             $e instanceof AuthenticationException => $this->authenticationExceptionResponse($request, $e),
-            $e instanceof ValidationException => $this->validationExceptionResponse($e, $request),
+            $e instanceof ValidationException => $this->validationExceptionResponse($request, $e),
+            $e instanceof ThrottleRequestsException => $this->throttleRequestsExceptionResponse($request, $e),
             default => $this->renderExceptionResponse($request, $e),
         };
-    }
-
-    protected function validationExceptionResponse(ValidationException $exception, $request): HttpResponse|HttpJsonResponse
-    {
-        return $this->shouldReturnJson($request, $exception)
-            ? $this->unprocessableResponse($exception->errors(), $exception->getMessage())
-            : $this->invalid($request, $exception);
-    }
-
-    protected function renderExceptionResponse($request, Throwable $e): HttpJsonResponse|SymfonyHttpFoundationResponse
-    {
-        return $this->shouldReturnJson($request, $e)
-            ? $this->serverErrorResponse()
-            : $this->prepareResponse($request, $e);
     }
 
     protected function invalidAbilityExceptionResponse($request, AuthorizationException $exception): HttpJsonResponse|SymfonyHttpFoundationResponse
@@ -106,5 +94,26 @@ class Handler extends ExceptionHandler
         return $this->shouldReturnJson($request, $exception)
             ? $this->unauthorizedResponse($exception->getMessage())
             : redirect()->guest($exception->redirectTo() ?? route('login'));
+    }
+
+    protected function validationExceptionResponse($request, ValidationException $exception): HttpResponse|HttpJsonResponse
+    {
+        return $this->shouldReturnJson($request, $exception)
+            ? $this->unprocessableResponse($exception->errors(), $exception->getMessage())
+            : $this->invalid($request, $exception);
+    }
+
+    protected function throttleRequestsExceptionResponse($request, ThrottleRequestsException $exception): HttpResponse|HttpJsonResponse
+    {
+        return $this->shouldReturnJson($request, $exception)
+            ? $this->tooManyRequestsResponse($exception->getMessage())
+            : $this->renderExceptionResponse($request, $exception);
+    }
+
+    protected function renderExceptionResponse($request, Throwable $e): HttpJsonResponse|SymfonyHttpFoundationResponse
+    {
+        return $this->shouldReturnJson($request, $e)
+            ? $this->serverErrorResponse()
+            : $this->prepareResponse($request, $e);
     }
 }
