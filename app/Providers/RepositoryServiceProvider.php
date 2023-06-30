@@ -20,6 +20,7 @@ class RepositoryServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->bind(\App\Blueprint\Repositories\PrototypeRepository::class, \App\Repositories\PrototypeRepositoryEloquent::class);
+        $this->app->bind('prototype', \App\Repositories\PrototypeRepositoryEloquent::class);
         //:end-bindings:
     }
 }
