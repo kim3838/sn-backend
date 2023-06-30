@@ -14,7 +14,11 @@ class PrototypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->address,
+            'name' => $this->faker->randomElement([
+                _str_random(3) . ' ' . _str_random(5) . ' ' . _str_random(3),
+                _str_random(6) . ' ' . _str_random(3) . ' ' . _str_random(2),
+                _str_random(3) . ' ' . _str_random(3) . ' ' . _str_random(5)
+            ]),
             'code' => 'PRT' . $this->faker->numerify('######') . $this->faker->numerify('####'),
             'type' => $this->faker->numberBetween(1, 5),
             'category' => $this->faker->randomElement([null, $this->faker->numberBetween(1, 200)]),
