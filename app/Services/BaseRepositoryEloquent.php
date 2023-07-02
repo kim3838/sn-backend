@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Request;
 use Prettus\Repository\Eloquent\BaseRepository;
 
 abstract class BaseRepositoryEloquent extends BaseRepository
@@ -18,10 +19,8 @@ abstract class BaseRepositoryEloquent extends BaseRepository
      */
     protected function createPaginationFromBuilder(Builder $queryBuilder): LengthAwarePaginator
     {
-        $request = $this->app['request'];
-
-        $itemsPerPage = $request->get('itemsPerPage', config('repository.pagination.limit', 50));
-        $page = $request->get('page', 1);
+        $itemsPerPage = Request::get('itemsPerPage', config('repository.pagination.limit', 50));
+        $page = Request::get('page', 1);
 
         $count = $queryBuilder->getCountForPagination();
 
