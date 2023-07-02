@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\BaseController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\FormModulesController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,3 +41,5 @@ Route::group([
         Route::delete('users/{user}', [UserController::class, 'destroy'])->name('destroy');
     });
 });
+
+Route::get('selections/{module}', [FormModulesController::class, 'selection'])->name('selection');
