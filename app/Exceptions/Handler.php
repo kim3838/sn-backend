@@ -53,6 +53,7 @@ class Handler extends ExceptionHandler
     {
         Log::error(print_r([
             'file' => $e->getFile(),
+            'class' => get_class($e),
             'line' => $e->getLine(),
             'message' => $e->getMessage()
         ], true));
